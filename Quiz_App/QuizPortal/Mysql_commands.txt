@@ -1,0 +1,94 @@
+CREATE DATABASE quiz_portal;
+USE quiz_portal;
+
+-- 1. Admin Table
+CREATE TABLE admin (
+   admin_id INT PRIMARY KEY AUTO_INCREMENT,
+   username VARCHAR(50) UNIQUE NOT NULL,
+   password VARCHAR(100) NOT NULL,
+   email VARCHAR(100),
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Users Table
+CREATE TABLE users (
+   user_id INT PRIMARY KEY AUTO_INCREMENT,
+   username VARCHAR(50) UNIQUE NOT NULL,
+   email VARCHAR(100) UNIQUE NOT NULL,
+   password VARCHAR(100) NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Questions Table
+CREATE TABLE questions (
+   question_id INT PRIMARY KEY AUTO_INCREMENT,
+   question_text TEXT NOT NULL,
+   option_a VARCHAR(200) NOT NULL,
+   option_b VARCHAR(200) NOT NULL,
+   option_c VARCHAR(200) NOT NULL,
+   option_d VARCHAR(200) NOT NULL,
+   correct_option CHAR(1) NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Quiz Table
+CREATE TABLE quiz (
+   quiz_id INT PRIMARY KEY AUTO_INCREMENT,
+   quiz_name VARCHAR(100) NOT NULL,
+   category VARCHAR(50),
+   created_by INT,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (created_by) REFERENCES admin(admin_id)
+);
+
+-- 5. Quiz Questions Mapping Table
+CREATE TABLE quiz_questions (
+   id INT PRIMARY KEY AUTO_INCREMENT,
+   quiz_id INT,
+   question_id INT,
+   FOREIGN KEY (quiz_id) REFERENCES quiz(quiz_id),
+   FOREIGN KEY (question_id) REFERENCES questions(question_id)
+);
+
+-- 6. User Quiz Attempts Table
+CREATE TABLE user_quiz_attempts (
+   attempt_id INT PRIMARY KEY AUTO_INCREMENT,
+   user_id INT,
+   quiz_id INT,
+   score INT,
+   total_questions INT,
+   attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (user_id) REFERENCES users(user_id),
+   FOREIGN KEY (quiz_id) REFERENCES quiz(quiz_id)
+);
+
+-- 7. User Answers Table
+CREATE TABLE user_answers (
+   answer_id INT PRIMARY KEY AUTO_INCREMENT,
+   attempt_id INT,
+   question_id INT,
+   selected_option CHAR(1),
+   is_correct BOOLEAN,
+   FOREIGN KEY (attempt_id) REFERENCES user_quiz_attempts(attempt_id),
+   FOREIGN KEY (question_id) REFERENCES questions(question_id)
+);
+
+INSERT INTO admin (username, password, email)
+VALUES ('admin', 'admin123', 'admin@quiz.com');
+
+
+INSERT INTO questions (question_text, option_a, option_b, option_c, option_d, correct_option)
+VALUES
+('What does JVM stand for?', 'Java Virtual Machine', 'Java Variable Method', 'Java Vendor Machine', 'Java Visual Model', 'A'),
+('Which keyword is used for inheritance in Java?', 'implements', 'extends', 'inherits', 'super', 'B'),
+('What is the size of int in Java?', '2 bytes', '4 bytes', '8 bytes', '16 bytes', 'B');
+
+select * from questions;
+
+-- Altering questions to support multiple answers 
+Alter Table questions MODIFY correct_option VARCHAR(10) NOT NULL;
+
+select * from quiz;
+update quiz
+SET quiz_name = 'Hackathon-2025'
+where quiz_id = 1;
